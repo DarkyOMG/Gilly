@@ -1,6 +1,6 @@
 require 'discordrb'
 
-bot = Discordrb::Bot.new token: 'NjMzMDAyODQ5NjM0MjIyMTM0.XaOZpw.ld_6ZSU0-jpQvtdSLKmiNiaEsN8'
+bot = Discordrb::Bot.new token: '<Token here>'
 
 bot.message(with_text: '§') do |event|
   event.respond 'Try §help :)'
