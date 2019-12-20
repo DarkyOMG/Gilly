@@ -30,7 +30,7 @@ def trysolve(try, keyword, tries, event)
   end
 end
 def findWord()
-  words = File.read("words.txt").encode('UTF-8', :invalid => :replace).split
+  words = File.read("words.txt").encode('ISO-8859-1', :invalid => :replace).split
   wordnumber = rand(words.size-1)
   keyword = words[wordnumber]
   return keyword
@@ -55,7 +55,7 @@ bot.message(with_text: '§') do |event|
 end
 
 bot.message(with_text: '§help') do |event|
-  event.respond 'You can try §play.. Or nothing.. Hihi :)'
+  event.respond 'You can try §play to play hangman with me, or §rep to see my source.'
 end
 
 bot.ready do
@@ -63,18 +63,19 @@ bot.ready do
 end
 
 bot.message(with_text: '§rep') do |event|
-  event.respond 'https://github.com/DarkyOMG/DiscBot'
+  event.respond 'https://github.com/DarkyOMG/Gilly'
 end
 
 bot.message(with_text: '§play') do |event|
-  event.respond 'Wanna play? ;)'
+
+  event.respond '' + event.user.name + ', wanna play? ;)'
   asked = false
   word = ''
   tries = 8
   oldvalue = ''
   event.user.await(:answer) do |answer_event|
     answer = answer_event.message.content
-    if answer == "yes" && !asked then
+    if answer[0].downcase == "y" && !asked then
       answer_event.respond 'Alrighty! If you want to stop write § or use any other command.'
       asked = true
       word = findWord()
@@ -89,15 +90,7 @@ bot.message(with_text: '§play') do |event|
       end
       if !cancel
         if answer.size > 1 then
-          done = trysolve(answer, word, tries, answer_event)
-          if !done
-            tries-=1
-          end
-          if tries < 1
-            answer_event.respond 'You lost.. :('
-            true
-          end
-          done
+          false
         else
           goodletter = tryletter(answer,word,oldvalue)
           if goodletter then
@@ -122,6 +115,7 @@ bot.message(with_text: '§play') do |event|
         answer_event.respond "Try a letter or word."
         false
         else
+	answer_event.respond word
         true
         end
       end
