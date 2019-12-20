@@ -1,9 +1,8 @@
 require 'discordrb'
 require_relative 'hangman'
 
-token1 = (File.read("token.txt").split)[0]
+token = (File.read("token.txt").split)[0]
 
-token = token1
 bot = Discordrb::Bot.new token: token
 
 def printpretty(word,event)
