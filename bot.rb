@@ -1,5 +1,9 @@
 require 'discordrb'
-require_relative 'hangman'
+begin
+  require 'hangman'
+rescue LoadError
+  require_relative 'hangman'
+end
 
 token = ENV["BOT_TOKEN"] || (File.read("token.txt").split)[0]
 
