@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  gilly:
+    build: .
+    environment:
+      - BOT_TOKEN

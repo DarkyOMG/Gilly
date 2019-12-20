@@ -1,7 +1,11 @@
 require 'discordrb'
-require_relative 'hangman'
+begin
+  require 'hangman'
+rescue LoadError
+  require_relative 'hangman'
+end
 
-token = (File.read("token.txt").split)[0]
+token = ENV["BOT_TOKEN"] || (File.read("token.txt").split)[0]
 
 bot = Discordrb::Bot.new token: token
 
