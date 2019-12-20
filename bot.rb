@@ -1,9 +1,4 @@
 require 'discordrb'
-begin
-  require 'hangman'
-rescue LoadError
-  require_relative 'hangman'
-end
 
 token = ENV["BOT_TOKEN"] || (File.read("token.txt").split)[0]
 
@@ -34,7 +29,7 @@ def trysolve(try, keyword, tries, event)
   end
 end
 def findWord()
-  words = File.read("words.txt").encode('ISO-8859-1', :invalid => :replace).split
+  words = File.read("words.txt").encode('UTF-8', :invalid => :replace).split
   wordnumber = rand(words.size-1)
   keyword = words[wordnumber]
   return keyword
