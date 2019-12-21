@@ -38,16 +38,13 @@ games.delete(event.user.id)
 event.respond 'Okey, your game has been deleted.'
 end
 
-
-bot.message(start_with: '§hangman') do |event|
-if (event.message.content == "§hangman stop") then
-break
-end
+bot.message(start_with:'§try') do |event|
 if (games.key?(event.user.id)) then
-	regexp = /§hangman\s*(?<try>.*)/
+	regexp = /§try\s*(?<try>.*)/
     match =  regexp.match(event.message.content)
+	event.respond event.user.name
 	if match == nil then
-	 event.respond 'You have to guess! Try §hangman f or any other letter!'
+	 event.respond 'You have to guess! Try §try f or any other letter or word!'
 	elsif games[event.user.id].tried.include? match[:try] then
 	event.respond 'You alread tried that!'
 	elsif match[:try].length > 1 then
@@ -76,8 +73,17 @@ if (games.key?(event.user.id)) then
 	else
 	event.respond printpretty(games[event.user.id].guessed)
 	end
+ end
+end
+
+bot.message(start_with: '§hangman') do |event|
+if (event.message.content == "§hangman stop") then
+break
+end
+if (games.key?(event.user.id)) then
+ event.respond 'You already have an open hangman-game. Say §hangman stop if you want to cancel your current game or §try to try letters or words'
 else
- event.respond 'Alrighty! Give me your guesses like this §hangman f if you want to try the letter f.'
+ event.respond "Alrighty! Give me your guesses like this '§try f' if you want to try the letter f. You can also try to solve with '§try eisenbahn'."
  event.respond 'Or write §hangman stop if you want to cancel your current game.'
  games[event.user.id] = Game.new(findWord())
  puts games[event.user.id].word
