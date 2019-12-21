@@ -66,17 +66,7 @@ bot.message(with_text: '§rep') do |event|
   event.respond 'https://github.com/DarkyOMG/Gilly'
 end
 
-bot.message(with_text: '§takeword') do |event|
-  takeWord(event)
- end
 
- def takeWord(event)
- event.user.pm('Choose a word!')
- event.user.await(:word) do |word_event|
-  word = word_event.message.content
-  event.respond 'The word was ' +word
-  end
- end
 
 
 
