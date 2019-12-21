@@ -79,6 +79,7 @@ bot.message(with_text: '§takeword') do |event|
  end
 
 
+
 bot.message(with_text: '§play') do |event|
   event.respond '' + event.user.name + ', wanna play? ;)'
   asked = false
