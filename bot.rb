@@ -1,33 +1,18 @@
 require 'discordrb'
+require_relative 'hangman.rb'
 
 token = ENV["BOT_TOKEN"] || (File.read("token.txt").split)[0]
 
 bot = Discordrb::Bot.new token: token
-
-def printpretty(word,event)
+games = {}
+def printpretty(word)
   prettyword = ""
   for i in 0..word.size-1
     prettyword << word[i]+" "
   end
-  event.respond prettyword
+  return prettyword
 end
 
-def gettry(event)
-    try = answer_event.message.content
-  return try
-end
-
-def trysolve(try, keyword, tries, event)
-  if try.downcase == keyword.downcase then
-    event.respond try+" is right! You won!"
-    return true
-  else
-    tries -=1
-    event.respond ("That's not it.. you have "+tries.to_s+" lives left!")
-    event.respond "Try a letter or word."
-    return false
-  end
-end
 
 def findWord()
   words = File.read("words.txt").encode('UTF-8', :invalid => :replace).split
@@ -36,26 +21,9 @@ def findWord()
   return keyword
 end
 
-def tryletter(try,keyword,oldvalue)
-
-  ispresent = false
-  for i in 0..keyword.size-1
-    if try.downcase == keyword[i].downcase then
-      oldvalue[i] = try.downcase
-      ispresent = true
-    end
-  end
-  return ispresent
-end
-
-
-
-bot.message(with_text: '§') do |event|
-  event.respond 'Try §help :)'
-end
 
 bot.message(with_text: '§help') do |event|
-  event.respond 'You can try §play to play hangman with me, or §rep to see my source.'
+  event.respond 'You can try §hangman to play hangman with me, or §rep to see my source.'
 end
 
 bot.ready do
@@ -65,69 +33,58 @@ end
 bot.message(with_text: '§rep') do |event|
   event.respond 'https://github.com/DarkyOMG/Gilly'
 end
-
-
-
-
-
-bot.message(with_text: '§play') do |event|
-  event.respond '' + event.user.name + ', wanna play? ;)'
-  asked = false
-  word = ''
-  tries = 8
-  oldvalue = ''
-  event.user.await(:answer) do |answer_event|
-    answer = answer_event.message.content
-    if answer[0].downcase == "y" && !asked then
-      answer_event.respond 'Alrighty! If you want to stop write § or use any other command.'
-      asked = true
-      word = findWord()
-      oldvalue = "-"*(word.size)
-      printpretty(oldvalue,answer_event)
-      answer_event.respond "Try a letter or word."
-      false
-    elsif asked
-      if answer.include?("§") then
-        cancel = true
-        answer_event.respond "Alright, no more games :("
-      end
-      if !cancel
-        if answer.size > 1 then
-          false
-        else
-          goodletter = tryletter(answer,word,oldvalue)
-          if goodletter then
-            answer_event.respond answer+" is present!"
-            if oldvalue.downcase == word.downcase then
-              answer_event.respond "That's it! You won!"
-              done = true
-            end
-            printpretty(oldvalue,answer_event)
-          else
-            tries -= 1
-            if tries < 1
-              answer_event.respond 'You lost.. :('
-              dead = true
-              true
-            else
-              answer_event.respond answer+" is not in the word. You have "+tries.to_s+" lives left!"
-            end
-          end
-        end
-        if !dead && !done
-        answer_event.respond "Try a letter or word."
-        false
-        else
-	answer_event.respond word
-        true
-        end
-      end
-
-    else
-      true
-    end
-  end
+bot.message(with_text: '§hangman stop') do |event|
+games.delete(event.user.id)
+event.respond 'Okey, your game has been deleted.'
 end
+
+
+bot.message(start_with: '§hangman') do |event|
+if (event.message.content == "§hangman stop") then
+break
+end
+if (games.key?(event.user.id)) then
+	regexp = /§hangman\s*(?<try>.*)/
+    match =  regexp.match(event.message.content)
+	if match == nil then
+	 event.respond 'You have to guess! Try §hangman f or any other letter!'
+	elsif games[event.user.id].tried.include? match[:try] then
+	event.respond 'You alread tried that!'
+	elsif match[:try].length > 1 then
+	 if (games[event.user.id].trysolve(match[:try])) then
+	 event.respond "That's right! Congratulations!"
+	 event.respond '' +games[event.user.id].word + ' was the answer!'
+	 games.delete(event.user.id)
+	 break
+	 else
+	 games[event.user.id].loseLife()
+	 event.respond ''+ match[:try]+' is not right.'
+	 event.respond ''+ games[event.user.id].lives.to_s + ' lives left!'
+	 end
+	elsif (!(games[event.user.id].tryletter(match[:try]))) then
+	 games[event.user.id].loseLife()
+	 event.respond ''+ match[:try]+' is not present.'
+	 event.respond ''+ games[event.user.id].lives.to_s + ' lives left!'
+	end
+	if (games[event.user.id].word.downcase == games[event.user.id].guessed.downcase) then
+	event.respond "That's right! Congratulations!"
+	event.respond '' +games[event.user.id].word + ' was the answer!'
+	games.delete(event.user.id)
+	elsif (games[event.user.id].lives < 1) then
+	event.respond "You lost! But the word was "+games[event.user.id].word
+	games.delete(event.user.id)
+	else
+	event.respond printpretty(games[event.user.id].guessed)
+	end
+else
+ event.respond 'Alrighty! Give me your guesses like this §hangman f if you want to try the letter f.'
+ event.respond 'Or write §hangman stop if you want to cancel your current game.'
+ games[event.user.id] = Game.new(findWord())
+ puts games[event.user.id].word
+ event.respond printpretty(games[event.user.id].guessed)
+ end
+end
+
 
 bot.message(with_text: '§gotobed') do |event|
   event.respond 'Sleep tight :)'
