@@ -87,8 +87,8 @@ bot.application_command(:hangman).subcommand('start') do |event|
 		games[event.user.id] = Game.new(findWord())
 		puts games[event.user.id].word
 		event.respond content: printpretty(games[event.user.id].guessed)
-		event.channel.send_message "
-			Alrighty! Give me your guesses like this `/try f` if you want to try the letter f. You can also try to solve with `/try eisenbahn`. Or write `/hangman stop` if you want to cancel your current game."
+		event.channel.send_message "Alrighty! Give me your guesses like this `/try f` if you want to try the letter f. You can also try to solve with `/try eisenbahn`."
+		event.channel.send_message "Or write `/hangman stop` if you want to cancel your current game."
 	end
 end
 
